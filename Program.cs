@@ -15,118 +15,68 @@ namespace student_2023_assignment
 {
     internal class Program
     {
-        static HttpClient  httpClient = new HttpClient();
+       
         static async Task Main()
         {
+
+            string URL_data = "https://raw.githubusercontent.com/thewhitesoft/student-2023-assignment/main/data.json";
+            string URL_replacenent = "https://raw.githubusercontent.com/thewhitesoft/student-2023-assignment/main/replacement.json";
+
+            ClientAPI api = new ClientAPI();
+            ParserJsonReplacement parser = new ParserJsonReplacement();
+
+            object jsonData = await api.GetJsonData(URL_data);
+            string[] dataJsonArray;
            
-            object jsonData = await httpClient.GetFromJsonAsync("https://raw.githubusercontent.com/thewhitesoft/student-2023-assignment/main/data.json", typeof(string[]));
-            string[] dataJsonArray = (string[])jsonData;
+            object jsonReplacement = await api.GetJsonReplacement(URL_replacenent);
+            List<Replacement_Class> replacementJson;
+           
+           
 
-            string currentPuth = Directory.GetCurrentDirectory();
-            currentPuth = currentPuth.Replace("bin\\Debug", "");
 
-            string path = currentPuth + "\\replacement.json";
-            string json = File.ReadAllText(path);
 
-            List<Replacement_Class> replacementJson = JsonConvert.DeserializeObject<List<Replacement_Class>>(json);
-            List<string> source = new List<string>();
-            List<string> replecement = new List<string>();
-            foreach (Replacement_Class item in replacementJson)
+            if (jsonReplacement != null)
             {
-                if (replecement.Count == 0)
+                replacementJson = (List<Replacement_Class>)jsonReplacement;
+                parser.ParseReplacement_Class(replacementJson);
+
+                if (jsonData != null)
                 {
-                    replecement.Add(item.Replacement);
-                    source.Add(item.Source);
-                }
-                else 
-                {
-                    bool uniqueness = true;
-                    for (int i = 0; i < replecement.Count; i++)
+                    dataJsonArray = (string[])jsonData;
+                    parser.ParseData(dataJsonArray, parser.replacemets);
+
+                    List<string> data = new List<string>();
+
+                    for (int i = 0; i < dataJsonArray.Length; i++)
                     {
-                        if (replecement[i] == item.Replacement)
+                        if (dataJsonArray[i] != "")
                         {
-                            source[i] = item.Source;
-                            uniqueness = false;
+                            data.Add(dataJsonArray[i]);
                         }
                     }
 
-                    if (uniqueness == true)
-                    {
-                        replecement.Add(item.Replacement);
-                        source.Add(item.Source);
-                    }
-                        
-                    
+                    string dataSerialize = JsonConvert.SerializeObject(data, Formatting.Indented);
+
+
+                    string filePth = "result\\result.json";
+
+                    File.WriteAllText(filePth, dataSerialize);
+
+
+                    Console.WriteLine($"Путь файла result.json: {filePth}");
+                    Console.WriteLine("Результат файла:");
+                    Console.WriteLine(File.ReadAllText(filePth));
+
                 }
-            }
-
-
-           List<int> index = new List<int>();
-
-            for (int i = 0; i < dataJsonArray.Length; i++)
-            {
-                for (int j = 0; j < replecement.Count; j++)
+                else
                 {
-                    if (source[j] == null)
-                    {
-                        dataJsonArray[i] = dataJsonArray[i].Replace(replecement[j], "");
-                    } 
-                    else if (source[j].Length == 1)
-                    {
-                        index.Add(j);
-                    }
-                    else
-                    {
-                        dataJsonArray[i] = dataJsonArray[i].Replace(replecement[j], source[j]);
-                    }
+                    Console.WriteLine("Не удалось получить испорченные сообщения!");
                 }
             }
-
-
-            for (int i = 0; i < index.Count; i++)
+            else
             {
-                for (int j = 0; j < dataJsonArray.Length; j++)
-                {
-                    dataJsonArray[j] = dataJsonArray[j].Replace(replecement[index[i]], source[index[i]]);
-                }
+                Console.WriteLine("Не удалось получить список замен!");
             }
-
-
-            List<string> data = new List<string>();
-
-            for (int i = 0; i < dataJsonArray.Length; i++)
-            {
-                if (dataJsonArray[i] != "")
-                {
-                    data.Add(dataJsonArray[i]);
-                }
-            }
-
-            string dataSerialize = JsonConvert.SerializeObject(data, Formatting.Indented);
-
-
-           
-
-            
-
-            
-            
-
-            path = currentPuth + "result";
-
-            Directory.CreateDirectory(path);
-
-            string filePth = path + "\\result.json";
-
-            File.WriteAllText(filePth, dataSerialize);
-
-
-            Console.WriteLine($"Путь файла result.json: {filePth}");
-            Console.WriteLine("Результат файла:");
-            Console.WriteLine(File.ReadAllText(filePth));
-
-        
-
 
 
 

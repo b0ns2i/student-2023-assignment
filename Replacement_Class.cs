@@ -11,7 +11,6 @@ namespace student_2023_assignment
 
         public string Replacement { get; set; }
         public string Source { get; set; }
-        public bool Status { get; set; }
         public Replacement_Class(string replacement, string source)
         {
             Replacement = replacement;
