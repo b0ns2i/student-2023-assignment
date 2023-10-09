@@ -10,10 +10,10 @@ using System.Threading.Tasks;
 
 namespace student_2023_assignment
 {
-    class ClientAPI
-    {
+    public class ClientAPI : IClientAPI
+    { 
         HttpClient httpClient = new HttpClient();
-   
+        public string exception; 
 
         public async Task<object> GetJsonData(string URL)
         {
@@ -40,7 +40,8 @@ namespace student_2023_assignment
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                exception = "Возникла ошибка в ClientAPI.GetJsonReplacement()";
+                Console.WriteLine(exception);
             }
 
             return jsonReplacement;
